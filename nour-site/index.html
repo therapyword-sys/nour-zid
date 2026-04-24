@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOUR ZIDANI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #FFB800;
+    --off-white: #F5F0E8;
+    --muted: rgba(245,240,232,0.45);
+    --dark: #0a0a0a;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    color: var(--off-white);
+    font-family: 'EB Garamond', serif;
+    overflow: hidden;
+  }
+
+  /* VIDEO BACKGROUND */
+  .video-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .video-bg video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    position: absolute;
+    inset: 0;
+  }
+
+  .video-bg video.active { opacity: 1; }
+
+  /* DARK OVERLAY */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.52);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* SCREENS */
+  .screen {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+    overflow-y: auto;
+    padding: 60px 48px;
+  }
+
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ENTRY */
+  #screen-entry {
+    text-align: center;
+    gap: 0;
+  }
+
+  #screen-entry h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 110px);
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    margin-bottom: 64px;
+  }
+
+  .entry-links {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .entry-link {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.25em;
+    color: var(--off-white);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s, letter-spacing 0.3s;
+    background: none;
+    border: none;
+  }
+
+  .entry-link:hover { color: var(--gold); letter-spacing: 0.35em; }
+
+  .entry-note {
+    margin-top: 56px;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* BRANCH SCREENS */
+  .branch-content {
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .branch-header {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 6vw, 80px);
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    line-height: 1.05;
+    margin-bottom: 48px;
+  }
+
+  .section {
+    margin-bottom: 64px;
+  }
+
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .body-text {
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.85;
+    color: var(--off-white);
+  }
+
+  .muted-text {
+    font-style: italic;
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-top: 12px;
+  }
+
+  .cta {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    margin-top: 20px;
+    transition: opacity 0.2s;
+  }
+
+  .cta:hover { opacity: 0.6; }
+
+  .cta-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  hr.rule {
+    border: none;
+    border-top: 1px solid rgba(245,240,232,0.12);
+    margin: 48px 0;
+  }
+
+  /* BACK NAV */
+  .back-nav {
+    position: fixed;
+    bottom: 32px;
+    left: 48px;
+    z-index: 100;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: color 0.2s;
+    display: none;
+  }
+
+  .back-nav:hover { color: var(--gold); }
+  .back-nav.visible { display: block; }
+
+  /* FORM FIELDS */
+  .field { margin-bottom: 28px; }
+
+  .field-label {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .field input, .field textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(245,240,232,0.25);
+    color: var(--off-white);
+    font-family: 'EB Garamond', serif;
+    font-size: 18px;
+    font-style: italic;
+    padding: 8px 0 10px;
+    outline: none;
+    resize: none;
+    transition: border-color 0.3s;
+  }
+
+  .field input::placeholder, .field textarea::placeholder {
+    color: rgba(245,240,232,0.3);
+    font-style: italic;
+  }
+
+  .field input:focus, .field textarea:focus {
+    border-bottom-color: var(--gold);
+  }
+
+  .field textarea { min-height: 100px; line-height: 1.7; }
+
+  /* AI RESPONSE */
+  .ai-response {
+    display: none;
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.85;
+    color: var(--off-white);
+    border-left: 1px solid var(--gold);
+    padding-left: 20px;
+    margin-top: 28px;
+  }
+
+  .ai-translating {
+    display: none;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-top: 24px;
+    opacity: 0.7;
+  }
+
+  .contact-actions {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  /* SOCIOLOGY NODES */
+  .nodes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .node {
+    cursor: default;
+    transition: transform 0.3s ease;
+    padding: 4px 0;
+  }
+
+  .node:hover { transform: scale(1.03); transform-origin: left center; }
+
+  .node-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .node-text {
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.8;
+    color: var(--off-white);
+  }
+
+  /* DISPATCH ENTRIES */
+  .dispatch-entry {
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid rgba(245,240,232,0.08);
+  }
+
+  .dispatch-meta {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    opacity: 0.7;
+    margin-bottom: 12px;
+  }
+
+  .dispatch-text {
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.85;
+    color: var(--off-white);
+  }
+
+  /* CONSCIOUSNESS DEFINITIONS */
+  .definition-entry {
+    margin-bottom: 28px;
+    padding-left: 20px;
+    border-left: 1px solid rgba(255,184,0,0.3);
+  }
+
+  .definition-text {
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--off-white);
+  }
+
+  /* CENTER / WHO IS BEHIND */
+  #screen-center .branch-content {
+    text-align: center;
+  }
+
+  #screen-center .branch-header {
+    font-size: clamp(28px, 4vw, 56px);
+    margin-bottom: 32px;
+  }
+
+  .center-links {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  .scrollable { overflow-y: auto; max-height: 100vh; }
+  .scrollable::-webkit-scrollbar { display: none; }
+  .scrollable { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body>
+
+<!-- VIDEO BACKGROUNDS -->
+<div class="video-bg" id="videoBg">
+  <video crossorigin="anonymous" id="vid-entry" src="https://res.cloudinary.com/dntwopfot/video/upload/v1777045811/entry_zbkvmn.mp4" autoplay muted loop playsinline class="active"></video>
+  <video crossorigin="anonymous" id="vid-art" src="https://res.cloudinary.com/dntwopfot/video/upload/v1777045817/art_r4owv8.mp4" muted loop playsinline></video>
+  <video crossorigin="anonymous" id="vid-civilization" src="https://res.cloudinary.com/dntwopfot/video/upload/v1777045812/civilization_sjajjp.mp4" muted loop playsinline></video>
+  <video crossorigin="anonymous" id="vid-history" src="https://res.cloudinary.com/dntwopfot/video/upload/v1777045811/history_ukmkqh.mp4" muted loop playsinline></video>
+  <video crossorigin="anonymous" id="vid-sociology" src="https://res.cloudinary.com/dntwopfot/video/upload/v1777045821/sociology_ixfbzl.mp4" muted loop playsinline></video>
+  <video crossorigin="anonymous" id="vid-consciousness" src="https://res.cloudinary.com/dntwopfot/video/upload/v1777045823/consciousness_r9pac5.mp4" muted loop playsinline></video>
+</div>
+<div class="overlay"></div>
+
+<!-- BACK NAV -->
+<button class="back-nav" id="backNav" onclick="goBack()">← BACK</button>
+
+<!-- ENTRY SCREEN -->
+<div class="screen active" id="screen-entry">
+  <h1>FIND YOUR<br>PROJECTION.</h1>
+  <div class="entry-links">
+    <button class="entry-link" onclick="goTo('art')">ENTER THROUGH EMOTION</button>
+    <button class="entry-link" onclick="goTo('civilization')">ENTER THROUGH STRUCTURE</button>
+    <button class="entry-link" onclick="goTo('history')">ENTER THROUGH MEMORY</button>
+    <button class="entry-link" onclick="goTo('consciousness')">ENTER THROUGH PERCEPTION</button>
+    <button class="entry-link" onclick="goTo('sociology')">ENTER THROUGH SYSTEMS</button>
+    <button class="entry-link" onclick="goTo('center')" style="margin-top:24px; color: var(--muted); font-size:11px;">WHO IS BEHIND THIS →</button>
+  </div>
+  <p class="entry-note">Choose carefully. Every mind has a different entry point.</p>
+</div>
+
+<!-- ART SCREEN -->
+<div class="screen" id="screen-art">
+  <div class="branch-content scrollable">
+    <h2 class="branch-header">A VISION IS CURATED NOWADAYS.<br>LET'S MAKE ART CHAOTIC AGAIN.</h2>
+
+    <div class="section">
+      <p class="body-text">Art was never meant to be curated. It was meant to be felt — before it was understood, before it was priced, before it was posted. Expression can be celebrated just as it can be critiqued and put aside. Both exist. Both matter. Both translate metaphysics into matter. Open your mind's horizon. This page is a sneak peek of my art language — show me yours.</p>
+      <p class="body-text" style="margin-top:20px;">Let's make art chaotic again.</p>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">DESCRIBE A FEELING. I'LL PAINT IT.</span>
+      <p class="body-text">Tell me something you can't say in words. A memory, a weight, a color you keep seeing in your mind. I'll translate it into a painting made only for you.</p>
+      <div style="margin-top:32px;">
+        <div class="field">
+          <input type="text" id="art-contact" placeholder="your email or WhatsApp number" />
+        </div>
+        <div class="field">
+          <textarea id="art-feeling" placeholder="describe the feeling" rows="4"></textarea>
+        </div>
+        <button class="cta" onclick="sendFeeling()">SEND IT →</button>
+        <div class="ai-translating" id="art-translating">translating...</div>
+        <div class="ai-response" id="art-response"></div>
+        <div class="contact-actions" id="art-contact-actions">
+          <a class="cta" id="art-email-link" href="#">EMAIL THIS TO NOUR →</a>
+          <a class="cta" id="art-wa-link" href="#" target="_blank">SEND TO WHATSAPP →</a>
+        </div>
+      </div>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">TRADE YOURS FOR MINE</span>
+      <p class="body-text">If you make something — painting, object, textile, anything made by hand — I'll consider a trade.</p>
+      <a class="cta" href="mailto:zidaninour@gmail.com?subject=Trade proposal">PROPOSE A TRADE →</a>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">BRAND YOUR UNIVERSE</span>
+      <p class="body-text">I build brand worlds the same way I paint — by feel, then by structure. L'Aiguille Empoisonnée. Hora's Rite. The Spiral Spectrum Protocol. If you have a universe that needs a visual language, let's talk.</p>
+      <div class="cta-stack">
+        <a class="cta" href="mailto:zidaninour@gmail.com?subject=Brand project">START THE CONVERSATION →</a>
+        <a class="cta" href="https://app.flora.ai/techniques/spiral-spectrum-protocol-lp7z8w" target="_blank">SEE THE ENGINE →</a>
+      </div>
+      <p class="muted-text">The Spiral Spectrum Protocol is a 7-phase brand identity engine. You drop in a raw idea — it extracts the tension, maps the brand world, and outputs a complete identity system. A protocol is also a painting.</p>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">OWN ONE</span>
+      <p class="body-text">Four paintings available soon. €200 each. Email to reserve yours before they're listed.</p>
+      <div class="cta-stack">
+        <a class="cta" href="mailto:zidaninour@gmail.com?subject=Painting inquiry">PURCHASE A PAINTING →</a>
+      </div>
+      <p class="muted-text">You can't preorder what you haven't seen. Or pay in Bitcoin — zidaninour@gmail.com</p>
+    </div>
+
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- CIVILIZATION SCREEN -->
+<div class="screen" id="screen-civilization">
+  <div class="branch-content scrollable">
+    <h2 class="branch-header">INFRASTRUCTURE IS CONSCIOUSNESS MADE STRUCTURAL.</h2>
+
+    <div class="section">
+      <p class="body-text">Civilizations do not collapse. They sediment. Every system of exchange ever built — barter, coin, credit, code — is the same instinct wearing a different skin. The instinct to record. To validate. To trust without touching.</p>
+      <p class="body-text" style="margin-top:20px;">The blockchain did not invent this. It remembered it.</p>
+      <p class="body-text" style="margin-top:20px;">Imagine what we would know if the Library of Alexandria had not burned. If the Library of Ashurbanipal had been preserved whole. If the Maya codices had not been destroyed by the same hands that feared what they contained. If the Yongle Encyclopedia had survived its own empire. Humanity would have a clear, chronological, unbroken thread — a ledger of itself. Instead we rebuild from fragments. We theorize from ruins. We call it history when it is really archaeology.</p>
+      <p class="body-text" style="margin-top:20px;">Archives are not the past. They are the continuity of what has been — which means they are also the architecture of what comes next. Our present is made from history. Our future is built first during the present. To lose the record is to lose the foundation. To lose the foundation is to build again from zero, every generation, on the same ground.</p>
+      <p class="body-text" style="margin-top:20px;">Something that stays after we perish is not nostalgia. It is proof of existence. It is the only true continuity.</p>
+      <p class="body-text" style="margin-top:20px;">Look at how a rumor travels and becomes law. How a handshake becomes a contract becomes a constitution. How a belief, repeated enough times, becomes gravity. These are consensus mechanisms. These are proof-of-work systems. These are nodes validating each other across time.</p>
+      <p class="body-text" style="margin-top:20px;">Science mirrors this too. A theorem is gossip that survived peer review. A law of physics is a pattern the universe kept repeating until we noticed. Chemistry is how things bond, break, and transform — which is what markets do. What migrations do. What civilizations do before they forget they are doing it.</p>
+      <p class="body-text" style="margin-top:20px;">The mind is a biological blockchain. Thoughts chain to experiences. Memories validate perception. The subconscious is an open-source network — rarely accessed, but always writing. Everyone seeks decentralization now. Not just in tech, but in identity. Consciousness becomes the sovereign currency.</p>
+      <p class="body-text" style="margin-top:20px;">To build the next system is not to code a better machine. It's to build a better mirror. To decentralize, truly, is to give form to freedom.</p>
+      <p class="body-text" style="margin-top:20px;">The social link was always a chain. The ledger was always distributed. The network was always us.</p>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">TBNAOC</span>
+      <p class="body-text">The Bitcoin Network as Operating Civilization. A protocol proposing Bitcoin as the base layer of civilizational infrastructure — not finance. Infrastructure. A dual-rail economy: capital denominated in sats, labor denominated in non-tradeable Energy credentials. You cannot buy Energy. You can only earn it. This separation makes exploitation structurally impossible.</p>
+      <p class="body-text" style="margin-top:20px;">The architecture was designed. The whitepaper exists. The thinking is ongoing. This is not a startup. It is not a product. It is a protocol on its journey of creation — and it was architected here.</p>
+    </div>
+
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- HISTORY SCREEN -->
+<div class="screen" id="screen-history">
+  <div class="branch-content scrollable">
+    <h2 class="branch-header">THERE ARE PLACES NOT JUST MOVING FORWARD.<br>THEY ARE REMEMBERING FORWARD.</h2>
+
+    <div class="section">
+      <p class="body-text">Every civilization that fell left a question in the rubble. Not an answer — a question. The ones that survived did so because someone wrote it down. The archive is not the past. It is the only proof that the past was real. File yours.</p>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">FILE A DISPATCH</span>
+      <div class="field">
+        <label class="field-label">YOUR NAME</label>
+        <input type="text" id="dispatch-name" placeholder="the name you carry" />
+      </div>
+      <div class="field">
+        <label class="field-label">COUNTRY OF ORIGIN</label>
+        <input type="text" id="dispatch-country" placeholder="where the chain starts for you" />
+      </div>
+      <div class="field">
+        <label class="field-label">YOUR MOMENT</label>
+        <textarea id="dispatch-moment" placeholder="write a moment when you recognized yourself in someone from a completely different culture, time, or place" rows="5"></textarea>
+      </div>
+      <button class="cta" onclick="fileDispatch()">FILE YOUR DISPATCH →</button>
+      <div id="dispatch-confirm" style="display:none; margin-top:16px;" class="muted-text">Filed. The chain grows.</div>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">DISPATCHES FROM THE CHAIN</span>
+      <div id="dispatches-list">
+        <div class="dispatch-entry">
+          <div class="dispatch-meta">NOUR — MOROCCO / GERMANY</div>
+          <p class="dispatch-text">I recognized myself in a 12th century Andalusian manuscript I couldn't fully read. The hand was different. The ink was different. The century was different. But the argument was the same one I was having with myself that morning. Some frequencies don't age. They just wait for the right receiver.</p>
+        </div>
+        <div class="dispatch-entry">
+          <div class="dispatch-meta">NOUR — MOROCCO / GERMANY</div>
+          <p class="dispatch-text">My grandmother never used the word blockchain. But she kept every letter ever sent to her in a tin box organized by year. She knew that memory without structure is just feeling. That feeling without record disappears. She was running a consensus mechanism on analogue hardware.</p>
+        </div>
+        <div class="dispatch-entry">
+          <div class="dispatch-meta">NOUR — MOROCCO / GERMANY</div>
+          <p class="dispatch-text">The Maya didn't lose their knowledge when the codices burned. They lost the proof that they had it. That's the difference between erasure and forgetting. Erasure is violent. Forgetting is just time. What we build now is the fight against both.</p>
+        </div>
+      </div>
+      <p class="muted-text" style="margin-top:32px;">The chain continues. Be the next node.</p>
+    </div>
+
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- SOCIOLOGY SCREEN -->
+<div class="screen" id="screen-sociology">
+  <div class="branch-content scrollable">
+    <h2 class="branch-header">A COUNTRY THAT CAN HOLD TENSION WITHOUT COLLAPSE IS A COUNTRY THAT CAN HOLD THE FUTURE.</h2>
+
+    <div class="nodes-grid">
+      <div class="node"><div class="node-num">NODE 01</div><p class="node-text">Chaos is not the absence of order. It is unchanneled energy.</p></div>
+      <div class="node"><div class="node-num">NODE 02</div><p class="node-text">Our minds write patterns. Those patterns create the version of reality we walk inside.</p></div>
+      <div class="node"><div class="node-num">NODE 03</div><p class="node-text">The self is a system — made of signals, rhythms, boundaries, and feedback. Like any system, it needs regulation.</p></div>
+      <div class="node"><div class="node-num">NODE 04</div><p class="node-text">Sociology is consciousness at scale. What one mind does quietly, a civilization does loudly.</p></div>
+      <div class="node"><div class="node-num">NODE 05</div><p class="node-text">Systems pretend to be neutral. They never are. Every structure was built by someone who believed something.</p></div>
+      <div class="node"><div class="node-num">NODE 06</div><p class="node-text">Where modernity taught the world that evolution meant letting go of the past, some places teach that evolution means carrying it better.</p></div>
+      <div class="node"><div class="node-num">NODE 07</div><p class="node-text">A country that can hold tension without collapse is a country that can hold the future.</p></div>
+      <div class="node"><div class="node-num">NODE 08</div><p class="node-text">Hybrid identities are not diluted. They are amplified.</p></div>
+      <div class="node"><div class="node-num">NODE 09</div><p class="node-text">In a world falling apart from oversimplification, complexity is infrastructure.</p></div>
+      <div class="node"><div class="node-num">NODE 10</div><p class="node-text">The future is not being written in boardrooms. It is being whispered into fabric patterns. Typed into late-night group chats. Mixed into clay and oils.</p></div>
+      <div class="node"><div class="node-num">NODE 11</div><p class="node-text">Consciousness is not just awareness. It is maintenance. It is design. The human self becomes its first architecture.</p></div>
+      <div class="node"><div class="node-num">NODE 12</div><p class="node-text">The seeds of the future are not loud. They are not trending. But they are rooting, quietly.</p></div>
+    </div>
+
+    <div style="margin-top:64px;">
+      <a class="cta" href="https://t.me/joinchat" target="_blank">JOIN THE SPACE →</a>
+      <p class="muted-text" style="margin-top:8px;">The pattern continues in the group.</p>
+    </div>
+
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- CONSCIOUSNESS SCREEN -->
+<div class="screen" id="screen-consciousness">
+  <div class="branch-content scrollable">
+    <h2 class="branch-header">THE MIND IS A BIOLOGICAL BLOCKCHAIN.</h2>
+
+    <div class="section">
+      <p class="body-text">Thoughts chain to experiences. Memories validate perception. The subconscious is the only real open source — unfiltered, unregulated, rarely accessed.</p>
+      <p class="body-text" style="margin-top:20px;">Consciousness is not a property to be measured. It is a pattern to be felt.</p>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">WHAT IS CONSCIOUSNESS TO YOU?</span>
+      <p class="muted-text" style="margin-bottom:24px;">One sentence. Add to the chain.</p>
+      <div class="field">
+        <input type="text" id="consciousness-input" placeholder="Consciousness is..." />
+      </div>
+      <button class="cta" onclick="addDefinition()">ADD YOUR DEFINITION →</button>
+      <div id="consciousness-confirm" style="display:none; margin-top:12px;" class="muted-text">Added to the chain.</div>
+    </div>
+
+    <hr class="rule">
+
+    <div class="section">
+      <span class="section-label">THE CHAIN</span>
+      <div id="definitions-list">
+        <div class="definition-entry">
+          <p class="definition-text">Consciousness is the moment you realize the observer and the observed are the same.</p>
+        </div>
+        <div class="definition-entry">
+          <p class="definition-text">Consciousness is what happens when a system becomes aware it is a system.</p>
+        </div>
+        <div class="definition-entry">
+          <p class="definition-text">Consciousness is the pause between stimulus and response where you remember you are free.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- CENTER / WHO IS BEHIND THIS -->
+<div class="screen" id="screen-center">
+  <div class="branch-content">
+    <h2 class="branch-header">NOUR ZIDANI</h2>
+    <p class="body-text" style="text-align:left;">Moroccan abstract painter and brand architect based in Germany. I work across painting, brand identity, creative direction, and systems thinking. Chemistry background. Everything here was made by hand or by instinct.</p>
+    <p class="body-text" style="text-align:left; margin-top:20px;">Same frequency. Different waves.</p>
+    <div class="center-links">
+      <a class="cta" href="https://www.behance.net/nourzidani" target="_blank">BEHANCE →</a>
+      <a class="cta" href="https://contra.com/nour_z" target="_blank">CONTRA →</a>
+      <a class="cta" href="https://app.flora.ai/techniques/spiral-spectrum-protocol-lp7z8w" target="_blank">THE SPIRAL SPECTRUM PROTOCOL →</a>
+      <a class="cta" href="mailto:zidaninour@gmail.com">zidaninour@gmail.com</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentScreen = 'entry';
+
+  const videoMap = {
+    entry: 'vid-entry',
+    art: 'vid-art',
+    civilization: 'vid-civilization',
+    history: 'vid-history',
+    sociology: 'vid-sociology',
+    consciousness: 'vid-consciousness',
+    center: 'vid-entry'
+  };
+
+  function goTo(branch) {
+    // Hide current
+    document.getElementById('screen-' + currentScreen).classList.remove('active');
+
+    // Switch video
+    document.querySelectorAll('.video-bg video').forEach(v => v.classList.remove('active'));
+    const newVid = document.getElementById(videoMap[branch]);
+    if (newVid) {
+      newVid.play();
+      newVid.classList.add('active');
+    }
+
+    // Show new screen
+    document.getElementById('screen-' + branch).classList.add('active');
+    currentScreen = branch;
+
+    // Show/hide back nav
+    document.getElementById('backNav').classList.toggle('visible', branch !== 'entry');
+
+    // Scroll to top
+    const sc = document.querySelector('#screen-' + branch + ' .scrollable');
+    if (sc) sc.scrollTop = 0;
+  }
+
+  function goBack() {
+    goTo('entry');
+  }
+
+  // FEELING FORM
+  async function sendFeeling() {
+    const feeling = document.getElementById('art-feeling').value.trim();
+    const contact = document.getElementById('art-contact').value.trim();
+    if (!feeling || feeling.length < 5) return;
+
+    document.getElementById('art-translating').style.display = 'block';
+    document.getElementById('art-response').style.display = 'none';
+    document.getElementById('art-contact-actions').style.display = 'none';
+
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feeling })
+      });
+      const data = await res.json();
+      const reply = data.reply || 'Something broke in the translation. Try again.';
+
+      document.getElementById('art-translating').style.display = 'none';
+      document.getElementById('art-response').style.display = 'block';
+      document.getElementById('art-response').textContent = reply;
+
+      const emailBody = `${reply}\n\n---\nContact: ${contact || 'not provided'}\nFeeling: ${feeling}`;
+      document.getElementById('art-email-link').href = `mailto:zidaninour@gmail.com?subject=A feeling for a painting&body=${encodeURIComponent(emailBody)}`;
+      document.getElementById('art-wa-link').href = `https://wa.me/4915755207246?text=${encodeURIComponent(reply + '\n\nContact: ' + (contact || 'not provided'))}`;
+      document.getElementById('art-contact-actions').style.display = 'flex';
+    } catch(e) {
+      document.getElementById('art-translating').style.display = 'none';
+      document.getElementById('art-response').style.display = 'block';
+      document.getElementById('art-response').textContent = 'Something broke in the translation. Try again.';
+    }
+  }
+
+  // HISTORY DISPATCH
+  async function fileDispatch() {
+    const name = document.getElementById('dispatch-name').value.trim();
+    const country = document.getElementById('dispatch-country').value.trim();
+    const moment = document.getElementById('dispatch-moment').value.trim();
+    if (!moment) return;
+
+    try {
+      await fetch('/api/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, country, moment })
+      });
+    } catch(e) {}
+
+    // Add to list locally
+    const list = document.getElementById('dispatches-list');
+    const entry = document.createElement('div');
+    entry.className = 'dispatch-entry';
+    entry.innerHTML = `<div class="dispatch-meta">${(name || 'ANONYMOUS')} — ${(country || 'UNKNOWN')}</div><p class="dispatch-text">${moment}</p>`;
+    list.insertBefore(entry, list.firstChild);
+
+    document.getElementById('dispatch-name').value = '';
+    document.getElementById('dispatch-country').value = '';
+    document.getElementById('dispatch-moment').value = '';
+    document.getElementById('dispatch-confirm').style.display = 'block';
+    setTimeout(() => document.getElementById('dispatch-confirm').style.display = 'none', 3000);
+  }
+
+  // CONSCIOUSNESS DEFINITION
+  async function addDefinition() {
+    const input = document.getElementById('consciousness-input').value.trim();
+    if (!input) return;
+
+    try {
+      await fetch('/api/consciousness', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ definition: input })
+      });
+    } catch(e) {}
+
+    const list = document.getElementById('definitions-list');
+    const entry = document.createElement('div');
+    entry.className = 'definition-entry';
+    entry.innerHTML = `<p class="definition-text">${input}</p>`;
+    list.insertBefore(entry, list.firstChild);
+
+    document.getElementById('consciousness-input').value = '';
+    document.getElementById('consciousness-confirm').style.display = 'block';
+    setTimeout(() => document.getElementById('consciousness-confirm').style.display = 'none', 2000);
+  }
+</script>
+</body>
+</html>
